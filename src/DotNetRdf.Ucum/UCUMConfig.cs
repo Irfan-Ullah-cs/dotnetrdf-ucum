@@ -1,5 +1,7 @@
+using System;
 using System.Globalization;
 using System.Threading;
+using VDS.RDF.Parsing;
 using VDS.RDF.Query;
 using VDS.RDF.Query.Expressions;
 using VDS.RDF.Query.Operators;
@@ -9,8 +11,8 @@ namespace DotNetRdf.Ucum;
 /// <summary>
 /// Entry point for activating the CDT UCUM extension.
 /// Call <see cref="Register"/> once at application startup, then use
-/// <see cref="CreateQueryOptions"/> to obtain a configured <see cref="LeviathanQueryOptions"/>
-/// for every <see cref="LeviathanQueryProcessor"/> that should evaluate CDT literals.
+/// <see cref="CdtQueryProcessor"/> for full CDT support including ORDER BY and aggregates,
+/// or <see cref="CreateQueryOptions"/> when you need a plain <see cref="LeviathanQueryProcessor"/>.
 /// </summary>
 public static class UCUMConfig
 {
@@ -22,7 +24,6 @@ public static class UCUMConfig
     /// </summary>
     public static void Register()
     {
-        // Interlocked ensures only the first caller does the registration work.
         if (Interlocked.CompareExchange(ref _registered, 1, 0) != 0) return;
 
         SparqlOperators.AddOperator(new CdtAdditionOperator());
@@ -31,6 +32,15 @@ public static class UCUMConfig
         SparqlOperators.AddOperator(new CdtDivisionOperator());
 
         SparqlExpressionFactory.AddCustomFactory(new CdtExpressionFactory());
+
+        var existing = XmlSpecsHelper.SupportedTypes;
+        if (!Array.Exists(existing, t => t == CdtNamespace.UcumUri.AbsoluteUri))
+        {
+            var extended = new string[existing.Length + 1];
+            Array.Copy(existing, extended, existing.Length);
+            extended[existing.Length] = CdtNamespace.UcumUri.AbsoluteUri;
+            XmlSpecsHelper.SupportedTypes = extended;
+        }
     }
 
     /// <summary>

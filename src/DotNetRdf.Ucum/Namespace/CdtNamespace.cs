@@ -8,7 +8,7 @@ public static class CdtNamespace
 
     public static readonly Uri UcumUri = new(NS + "ucum");
     public static readonly Uri UcumUnitUri = new(NS + "ucumunit");
-    public static readonly Uri SameDimensionUri = new("https://w3id.org/cdt/sameDimension");
+    public static readonly Uri SameDimensionUri = new(NS + "sameDimension");
 
     public static bool IsCdtDatatype(Uri? uri) =>
         uri?.AbsoluteUri.StartsWith(NS, StringComparison.Ordinal) == true;

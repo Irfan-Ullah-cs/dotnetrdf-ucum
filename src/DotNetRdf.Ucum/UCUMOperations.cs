@@ -47,9 +47,12 @@ public static class UCUMOperations
     public static int Compare(ILiteralNode a, ILiteralNode b) =>
         UcumService.Canonicalize(a.Value).CompareTo(UcumService.Canonicalize(b.Value));
 
-    /// <summary>Returns true if two cdt:ucum literals have equal values regardless of unit.</summary>
-    public static bool Equals(ILiteralNode a, ILiteralNode b) =>
-        Compare(a, b) == 0;
+    /// <summary>Returns true if two cdt:ucum literals have equal values regardless of unit. Returns false if dimensions are incompatible.</summary>
+    public static bool Equals(ILiteralNode a, ILiteralNode b)
+    {
+        try { return Compare(a, b) == 0; }
+        catch (UCUMDimensionException) { return false; }
+    }
 
     /// <summary>Returns true if two cdt:ucum literals measure the same physical dimension.</summary>
     public static bool SameDimension(ILiteralNode a, ILiteralNode b) =>

@@ -2,8 +2,6 @@ using System;
 
 namespace DotNetRdf.Ucum;
 
-// Holds a quantity in its canonical SI base form. Value and Unit come from Fhir.Metrics canonicalization.
-// Arithmetic results are always in SI base units; the original unit label is not preserved.
 public readonly struct UCUMQuantity : IEquatable<UCUMQuantity>, IComparable<UCUMQuantity>
 {
     public decimal Value { get; }
@@ -19,7 +17,7 @@ public readonly struct UCUMQuantity : IEquatable<UCUMQuantity>, IComparable<UCUM
 
     public string ToLexicalForm() => $"{Value} {Unit}";
 
-    public bool SameDimension(UCUMQuantity other) => Unit == other.Unit;
+    public bool SameDimension(UCUMQuantity other) => UcumService.SameDimension(this, other);
 
     public UCUMQuantity Add(UCUMQuantity other)
     {

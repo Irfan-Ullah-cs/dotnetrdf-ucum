@@ -21,11 +21,35 @@ public readonly struct UCUMUnit : IEquatable<UCUMUnit>
 
     public string ToLexicalForm() => Code;
 
-    public bool Equals(UCUMUnit other) => Code == other.Code;
+    public bool Equals(UCUMUnit other)
+    {
+        if (Code == other.Code) return true;
+        try
+        {
+            var a = UcumService.Canonicalize("1 " + Code);
+            var b = UcumService.Canonicalize("1 " + other.Code);
+            return a.Unit == b.Unit && a.Value == b.Value;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     public override bool Equals(object? obj) => obj is UCUMUnit u && Equals(u);
 
-    public override int GetHashCode() => Code.GetHashCode();
+    public override int GetHashCode()
+    {
+        try
+        {
+            var canonical = UcumService.Canonicalize("1 " + Code);
+            return HashCode.Combine(canonical.Value, canonical.Unit);
+        }
+        catch
+        {
+            return Code.GetHashCode();
+        }
+    }
 
     public override string ToString() => Code;
 }

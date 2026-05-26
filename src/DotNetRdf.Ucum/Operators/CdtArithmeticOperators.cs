@@ -1,5 +1,4 @@
 using VDS.RDF;
-using VDS.RDF.Configuration;
 using VDS.RDF.Nodes;
 using VDS.RDF.Query;
 using VDS.RDF.Query.Expressions;

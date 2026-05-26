@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VDS.RDF;
 using VDS.RDF.Nodes;
 using VDS.RDF.Query;
 using VDS.RDF.Query.Expressions;
@@ -19,7 +18,6 @@ public sealed class SameDimensionExpression : ISparqlExpression
         _right = right;
     }
 
-    // Evaluates both arguments then checks dimensional compatibility.
     public TResult Accept<TResult, TContext, TBinding>(
         ISparqlExpressionProcessor<TResult, TContext, TBinding> processor,
         TContext context,
@@ -36,6 +34,8 @@ public sealed class SameDimensionExpression : ISparqlExpression
                 UCUMQuantity qb = UCUMQuantityNode.ExtractQuantity(right);
                 if (new BooleanNode(qa.SameDimension(qb)) is TResult result)
                     return result;
+                throw new RdfQueryException(
+                    $"cdt:sameDimension cannot return a result in the current evaluation context");
             }
             catch (RdfQueryException) { throw; }
             catch (UCUMException ex)
@@ -44,7 +44,7 @@ public sealed class SameDimensionExpression : ISparqlExpression
             }
         }
 
-        throw new RdfQueryException("cdt:sameDimension requires two cdt:ucum typed literals");
+        throw new RdfQueryException("cdt:sameDimension requires two cdt:ucum typed literal arguments");
     }
 
     public T Accept<T>(ISparqlExpressionVisitor<T> visitor) => visitor.VisitUnknownFunction(

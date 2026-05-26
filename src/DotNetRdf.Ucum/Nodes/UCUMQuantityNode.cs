@@ -13,11 +13,23 @@ public class UCUMQuantityNode : LiteralNode, IValuedNode
     public UCUMQuantityNode(string lexicalForm, Uri datatypeUri)
         : base(lexicalForm, datatypeUri, false) { }
 
-    // Lazily parsed and cached canonical quantity.
-    public UCUMQuantity Quantity =>
-        _quantity ??= UcumService.Canonicalize(Value);
+    public UCUMQuantity Quantity => _quantity ??= UcumService.Canonicalize(Value);
 
-    // Extracts a UCUMQuantity from any IValuedNode that holds a cdt:ucum literal.
+    public override int CompareTo(INode other)
+    {
+        if (other is ILiteralNode lit && CdtNamespace.IsCdtQuantityDatatype(lit.DataType))
+        {
+            try
+            {
+                UCUMQuantity q = UcumService.Canonicalize(lit.Value);
+                if (!UcumService.SameDimension(Quantity, q)) return base.CompareTo(other);
+                return Quantity.CompareTo(q);
+            }
+            catch { }
+        }
+        return base.CompareTo(other);
+    }
+
     public static UCUMQuantity ExtractQuantity(IValuedNode node)
     {
         if (node is UCUMQuantityNode qn) return qn.Quantity;
@@ -29,17 +41,13 @@ public class UCUMQuantityNode : LiteralNode, IValuedNode
 
     public string AsString() => Value;
 
-    public long AsInteger() =>
-        throw new RdfQueryException("Cannot convert a CDT quantity literal to an integer");
+    public long AsInteger() => (long)Quantity.Value;
 
-    public decimal AsDecimal() =>
-        throw new RdfQueryException("Cannot convert a CDT quantity literal to a decimal");
+    public decimal AsDecimal() => Quantity.Value;
 
-    public float AsFloat() =>
-        throw new RdfQueryException("Cannot convert a CDT quantity literal to a float");
+    public float AsFloat() => (float)Quantity.Value;
 
-    public double AsDouble() =>
-        throw new RdfQueryException("Cannot convert a CDT quantity literal to a double");
+    public double AsDouble() => (double)Quantity.Value;
 
     public bool AsBoolean() =>
         throw new RdfQueryException("Cannot convert a CDT quantity literal to a boolean");
@@ -55,6 +63,5 @@ public class UCUMQuantityNode : LiteralNode, IValuedNode
 
     public string EffectiveType => DataType.AbsoluteUri;
 
-    // CDT quantities are not XSD numeric; arithmetic is handled by the CDT operators.
-    public SparqlNumericType NumericType => SparqlNumericType.NaN;
+    public SparqlNumericType NumericType => SparqlNumericType.Decimal;
 }

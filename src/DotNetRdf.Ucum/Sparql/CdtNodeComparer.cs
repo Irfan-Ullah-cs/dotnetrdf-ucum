@@ -5,8 +5,6 @@ using VDS.RDF.Query;
 
 namespace DotNetRdf.Ucum;
 
-// Wraps the default ISparqlNodeComparer. CDT literals are compared numerically
-// after canonicalization; all other nodes are delegated to the inner comparer.
 public sealed class CdtNodeComparer : ISparqlNodeComparer
 {
     private readonly ISparqlNodeComparer _inner;
@@ -43,7 +41,6 @@ public sealed class CdtNodeComparer : ISparqlNodeComparer
             UCUMQuantity qx = UcumService.Canonicalize(lx.Value);
             UCUMQuantity qy = UcumService.Canonicalize(ly.Value);
 
-            // Quantities of incompatible dimensions return false (no ordering defined).
             if (!qx.SameDimension(qy)) return false;
 
             result = qx.CompareTo(qy);
