@@ -59,6 +59,11 @@ public readonly struct UCUMQuantity : IEquatable<UCUMQuantity>, IComparable<UCUM
         return Value.CompareTo(other.Value);
     }
 
+    public static bool operator <(UCUMQuantity a, UCUMQuantity b) => a.CompareTo(b) < 0;
+    public static bool operator >(UCUMQuantity a, UCUMQuantity b) => a.CompareTo(b) > 0;
+    public static bool operator <=(UCUMQuantity a, UCUMQuantity b) => a.CompareTo(b) <= 0;
+    public static bool operator >=(UCUMQuantity a, UCUMQuantity b) => a.CompareTo(b) >= 0;
+
     public bool Equals(UCUMQuantity other) => Unit == other.Unit && Value == other.Value;
 
     public override bool Equals(object? obj) => obj is UCUMQuantity q && Equals(q);
