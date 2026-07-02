@@ -34,7 +34,23 @@ internal static class UcumService
         {
             Quantity q = _system.Value.Quantity(numericPart, unitPart);
             Quantity canonical = _system.Value.Canonical(q);
-            return new UCUMQuantity(canonical.Value.ToDecimal(), canonical.Metric.Symbols);
+            decimal value = canonical.Value.ToDecimal();
+
+            // Fhir.Metrics parses through double internally. A mathematically
+            // nonzero input (e.g. "5e-325") can fall below both double's and
+            // decimal's smallest representable magnitude and silently collapse
+            // to 0 with no exception. Detect that case explicitly: if the
+            // canonical result is exactly zero but the original lexical
+            // mantissa was not, the value underflowed rather than legitimately
+            // being zero, and that must surface as a parse failure rather than
+            // a silently wrong quantity.
+            if (value == 0m && !IsMathematicallyZero(numericPart))
+            {
+                throw new UCUMParseException(
+                    $"Value '{numericPart}' underflows to zero: magnitude is too small to be represented (min ~1e-28)");
+            }
+
+            return new UCUMQuantity(value, canonical.Metric.Symbols);
         }
         catch (OverflowException ex)
         {
@@ -51,6 +67,20 @@ internal static class UcumService
                 $"Cannot canonicalize unit '{unitPart}': special units with offset conversion formulas are not supported",
                 ex);
         }
+    }
+
+    // A lexical numeric form is mathematically zero only if every digit in its
+    // mantissa is '0' (the exponent is irrelevant: "0e500" is zero, "5e-325" is not,
+    // even though the latter underflows once represented in double/decimal).
+    private static bool IsMathematicallyZero(string numericPart)
+    {
+        var mantissa = numericPart.Split('e', 'E')[0];
+        foreach (char c in mantissa)
+        {
+            if (c is >= '1' and <= '9')
+                return false;
+        }
+        return true;
     }
 
     internal static bool SameDimension(UCUMQuantity a, UCUMQuantity b)

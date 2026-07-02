@@ -25,7 +25,7 @@ project.assets.json
 .vscode/
 
 # Test project
-tests/
+# tests/
 
 # OS
 .DS_Store
