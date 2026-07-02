@@ -7,6 +7,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DotNetRdf.Ucum</RootNamespace>
     <AssemblyName>DotNetRdf.Ucum</AssemblyName>
+
+    <Version>0.1.0</Version>
+    <PackageId>DotNetRdf.Ucum</PackageId>
+    <Authors>Irfan Ullah</Authors>
+    <Description>CDT (Custom Datatypes) UCUM extension for dotNetRDF, implementing cdt:ucum and cdt:ucumunit with unit-aware SPARQL arithmetic, comparison, and cdt:sameDimension.</Description>
+    <RepositoryUrl>https://github.com/Irfan-Ullah-cs/dotnetrdf-ucum</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
